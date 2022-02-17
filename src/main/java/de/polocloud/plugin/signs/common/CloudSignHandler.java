@@ -18,8 +18,6 @@ public class CloudSignHandler {
     public CloudSignHandler() {
         instance = this;
 
-
-
     }
 
     private List<IService> getPossibleServices() {

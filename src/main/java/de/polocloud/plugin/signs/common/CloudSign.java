@@ -4,17 +4,13 @@ import de.polocloud.api.service.IService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.bukkit.Location;
 
 @Setter
 @Getter
 @RequiredArgsConstructor
-public class CloudSign {
-
-    private final Location location;
-    private final String[] possibleGroups;
+public class CloudSign extends CloudSignInfo {
 
     private IService service;
-
+    private CloudSignState cloudSignState;
 
 }
