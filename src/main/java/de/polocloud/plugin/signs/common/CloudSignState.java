@@ -2,7 +2,7 @@ package de.polocloud.plugin.signs.common;
 
 public enum CloudSignState {
 
-    SEARING,
+    SEARCHING,
     ONLINE,
     FULL,
     MAINTENANCE;
