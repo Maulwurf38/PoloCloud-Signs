@@ -10,7 +10,6 @@ import lombok.Getter;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +24,8 @@ public class CloudSignHandler {
 
     public CloudSignHandler() {
         instance = this;
+
+        config.getCloudsigns().forEach(it -> addCloudSign(it));
 
         new CollectiveCloudEvents();
         confirmSigns();
@@ -46,12 +47,24 @@ public class CloudSignHandler {
         cloudSigns.add(new CloudSign(location, group));
     }
 
+    public void addCloudSign(@NotNull CloudSignInfo info) {
+        cloudSigns.add(new CloudSign(info.getLocation(), info.getPossibleGroup()));
+    }
+
     public Optional<CloudSign> getPossibleSignByGroup(String groupName) {
         return cloudSigns.stream().filter(it -> it.getPossibleGroup().equalsIgnoreCase(groupName) && it.getService() == null).findAny();
     }
 
+    public Optional<CloudSign> getSignByService(String service) {
+        return cloudSigns.stream().filter(it -> it.getService().equalsIgnoreCase(service)).findAny();
+    }
+
     public boolean hasCloudSign(CloudService cloudService) {
         return cloudSigns.stream().anyMatch(it -> it.getService() != null && it.getService().equalsIgnoreCase(cloudService.getName()));
+    }
+
+    public void updateAllSigns(){
+        cloudSigns.forEach(it -> it.update());
     }
 
 }

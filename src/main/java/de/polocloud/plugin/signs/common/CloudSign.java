@@ -2,10 +2,12 @@ package de.polocloud.plugin.signs.common;
 
 import de.polocloud.api.CloudAPI;
 import de.polocloud.api.service.CloudService;
+import de.polocloud.plugin.signs.bootstrap.CloudSignsBootstrap;
 import de.polocloud.plugin.signs.common.layout.CloudSignLayout;
 import de.polocloud.plugin.signs.config.SignConverter;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 
@@ -18,23 +20,34 @@ public class CloudSign extends CloudSignInfo {
 
     public CloudSign(Location location, String possibleGroup) {
         super(location, possibleGroup);
-
-
-        display(CloudSignHandler.getInstance().getConfig().getLayouts().get(cloudSignState));
+        update();
     }
 
-    public void create(CloudService cloudService){
+    public void create(CloudService cloudService) {
         this.service = cloudService.getName();
         cloudSignState = CloudSignState.ONLINE;
-        display(CloudSignHandler.getInstance().getConfig().getLayouts().get(cloudSignState));
+        update();
+    }
+
+    public void remove() {
+        this.service = null;
+        cloudSignState = CloudSignState.SEARCHING;
+        update();
     }
 
     public void display(CloudSignLayout cloudSignLayout) {
-        Sign sign = (Sign) getLocation().getBlock().getState();
-        for(int i = 0; i < cloudSignLayout.getLines().length; i++) {
-            sign.setLine(i, (cloudSignState == CloudSignState.ONLINE ? SignConverter.convertLine(cloudSignLayout.getLines()[i],
-                CloudAPI.getInstance().getServiceManager().getServiceByNameOrNull(service)) : cloudSignLayout.getLines()[i]));
-        }
-        sign.update(true, false);
+        Bukkit.getScheduler().callSyncMethod(CloudSignsBootstrap.getPlugin(CloudSignsBootstrap.class), () -> {
+            Sign sign = (Sign) getLocation().getBlock().getState();
+            for (int i = 0; i < cloudSignLayout.getLines().length; i++) {
+                sign.setLine(i, (cloudSignState == CloudSignState.ONLINE ? SignConverter.convertLine(cloudSignLayout.getLines()[i],
+                    CloudAPI.getInstance().getServiceManager().getServiceByNameOrNull(service)) : cloudSignLayout.getLines()[i]));
+            }
+            sign.update(true, false);
+            return null;
+        });
+    }
+
+    public void update() {
+        display(CloudSignHandler.getInstance().getConfig().getLayouts().get(cloudSignState));
     }
 }

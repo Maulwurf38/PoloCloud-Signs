@@ -1,10 +1,11 @@
 package de.polocloud.plugin.signs.common.events;
 
 import de.polocloud.api.CloudAPI;
-import de.polocloud.api.event.group.CloudServiceGroupUpdateEvent;
 import de.polocloud.api.event.player.CloudPlayerUpdateEvent;
 import de.polocloud.api.event.service.CloudServiceRemoveEvent;
 import de.polocloud.api.event.service.CloudServiceUpdateEvent;
+import de.polocloud.api.service.utils.ServiceState;
+import de.polocloud.api.service.utils.ServiceVisibility;
 import de.polocloud.plugin.signs.bootstrap.CloudSignsBootstrap;
 import de.polocloud.plugin.signs.common.CloudSignHandler;
 import org.bukkit.Bukkit;
@@ -20,19 +21,20 @@ public class CollectiveCloudEvents implements Listener {
         var eventHandler = CloudAPI.getInstance().getEventHandler();
 
         eventHandler.registerEvent(CloudServiceUpdateEvent.class, event -> {
+            if (CloudSignHandler.getInstance().hasCloudSign(event.getService())) {
 
+                return;
+            }
+            if (event.getService().getServiceState() == ServiceState.ONLINE) {
+                CloudSignHandler.getInstance().getPossibleSignByGroup(event.getService().getGroup().getName()).ifPresent(it -> it.create(event.getService()));
+            }
         });
 
-        eventHandler.registerEvent(CloudServiceRemoveEvent.class, event -> {
-
-        });
-
-        eventHandler.registerEvent(CloudServiceGroupUpdateEvent.class, event -> {
-
-        });
+        eventHandler.registerEvent(CloudServiceRemoveEvent.class, event -> CloudSignHandler.getInstance().getSignByService(event.getService()).ifPresent(it -> it.remove()));
 
         eventHandler.registerEvent(CloudPlayerUpdateEvent.class, event -> {
-
+            if (event.getUpdateReason() == CloudPlayerUpdateEvent.UpdateReason.SERVER_SWITCH)
+                CloudSignHandler.getInstance().updateAllSigns();
         });
 
         Bukkit.getPluginManager().registerEvents(this, CloudSignsBootstrap.getPlugin(CloudSignsBootstrap.class));

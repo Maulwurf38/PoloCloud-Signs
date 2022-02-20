@@ -7,8 +7,9 @@ public class SignConverter {
     public static String convertLine(String line, CloudService cloudService) {
 
         return line.replaceAll("%server%", cloudService.getName())
-            .replaceAll("%motd%", cloudService.getMotd())
-            .replaceAll("%players%", String.valueOf(cloudService.getOnlineCount()))
+                .replaceAll("%motd%", cloudService.getMotd())
+                .replaceAll("%group%", cloudService.getGroup().getName())
+                .replaceAll("%players%", String.valueOf(cloudService.getOnlineCount()))
             .replaceAll("%max_players%", String.valueOf(cloudService.getMaxPlayers()));
     }
 
