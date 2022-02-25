@@ -2,14 +2,15 @@ package de.polocloud.plugin.signs.common;
 
 import de.polocloud.api.CloudAPI;
 import de.polocloud.api.service.CloudService;
-import de.polocloud.api.service.utils.ServiceState;
-import de.polocloud.api.service.utils.ServiceVisibility;
+import de.polocloud.api.service.ServiceState;
 import de.polocloud.plugin.signs.common.events.CollectiveCloudEvents;
 import de.polocloud.plugin.signs.config.SignConfig;
+import de.polocloud.plugin.signs.config.gson.Document;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,11 +20,19 @@ public class CloudSignHandler {
 
     @Getter private static CloudSignHandler instance;
 
-    private static final List<CloudSign> cloudSigns = new ArrayList<>();
-    private SignConfig config = new SignConfig();
+    private final List<CloudSign> cloudSigns = new ArrayList<>();
+    private final SignConfig config;
 
     public CloudSignHandler() {
         instance = this;
+
+        File file = new File("plugins/cloudsigns/", "config.json");
+        if(file.exists()) {
+            this.config = new Document(file).get(SignConfig.class);
+        }else{
+            new File("plugins/cloudsigns/").mkdir();
+            new Document(this.config = new SignConfig()).write(file);
+        }
 
         config.getCloudsigns().forEach(it -> addCloudSign(it));
 
@@ -40,7 +49,7 @@ public class CloudSignHandler {
     }
 
     private List<CloudService> getPossibleServices() {
-        return CloudAPI.getInstance().getServiceManager().getAllServicesByState(ServiceState.ONLINE).stream().filter(it -> it.getServiceVisibility() == ServiceVisibility.VISIBLE && !hasCloudSign(it)).toList();
+        return CloudAPI.getInstance().getServiceManager().getAllServicesByState(ServiceState.ONLINE).stream().filter(it -> !hasCloudSign(it)).toList();
     }
 
     public void addCloudSign(@NotNull Location location, @NotNull String group) {
@@ -56,7 +65,7 @@ public class CloudSignHandler {
     }
 
     public Optional<CloudSign> getSignByService(String service) {
-        return cloudSigns.stream().filter(it -> it.getService().equalsIgnoreCase(service)).findAny();
+        return cloudSigns.stream().filter(it -> it.getService() != null && it.getService().equalsIgnoreCase(service)).findAny();
     }
 
     public boolean hasCloudSign(CloudService cloudService) {
