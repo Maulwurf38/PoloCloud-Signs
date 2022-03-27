@@ -49,4 +49,8 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <finalName>PoloCloud-Entity (${project.version})</finalName>
+    </build>
+
 </project>
