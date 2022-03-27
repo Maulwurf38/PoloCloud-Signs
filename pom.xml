@@ -50,7 +50,7 @@
     </dependencies>
 
     <build>
-        <finalName>PoloCloud-Entity (${project.version})</finalName>
+        <finalName>PoloCloud-Signs (${project.version})</finalName>
     </build>
 
 </project>
